@@ -34,27 +34,26 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-    
-    build-test:
-    runs-on: ubuntu-latest
+jobs:
+  test:
+    name: Test on node ${{ matrix.node_version }} and ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node_version: ['8', '10', '12']
+        os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: php-actions/composer@v5 # or alternative dependency management
-    - uses: php-actions/phpunit@v2
-      
-    deploy:
-  name: Deploy to prod
-  runs-on: ubuntu-latest
-  steps:
-  - uses: actions/checkout@v1
-  - name: Setup PHP
-    uses: shivammathur/setup-php@master
-    with:
-      php-version: 7.4
-  - name: Deploy
-    uses: deployphp/action@master
-    with:
-      private-key: ${{ secrets.PRIVATE_KEY }}
-      known-hosts: ${{ secrets.KNOWN_HOSTS }}
-      dep: deploy prod -v  
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node_version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node_version }}
+
+    - name: npm install, build and test
+      run: |
+        npm install
+        npm run build --if-present
+        npm test          
+          
+    
